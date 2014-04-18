@@ -13,8 +13,11 @@ Template.room.events = {
 			var room_name = document.getElementById('room_name');
 
 			if (room_name.value != '') {
-
-				Chatrooms.insert(chatroomE);
+				/*What we want the end result to be */
+				var newRoom = new Chatroom(room_name.value);
+				console.log("created newRoom");
+				// put this in the chatroom object
+				Chatrooms.insert(newRoom);
 				console.log("inserted into Chatrooms");
 				
 				//console.log(Chatrooms.find(chatroomB));
@@ -47,40 +50,31 @@ Template.input.events = {
 			var message = document.getElementById('message');
 
 			if (message.value != '') {
-				//What we want the end result to be
+				/*What we want the end result to be*/
+				// Create new Msg object, insert into Messages collection
 				var msg = new Msg(name, message.value);
+				// put into Msg object
 				Messages.insert(msg);
-				//var theRoom = Chatrooms.find( { name: { $exists: true, $in: ["chatroomE"] } } );
-				//var theRoom = Chatrooms.find( { _id: { $in: ["zRkrak2FzviGPpNSH"] } } );
-				var theRoom = Chatrooms.findOne( { name: "chatroomE"} );
 
-				//console.log("inserted into Messages collection");
-				//console.log(chatroomA.messages);
-				// chatroomA.messages.push(msg);
-				// Chatrooms.find("chatroomB").messages.push(msg);
-				console.log("the room is ", theRoom);
-				console.log("the room id is ", theRoom._id);
-
+				// Find and update the room that the message belongs to
+				// change to theRoom.messages.push() 
+				var theRoom = Chatrooms.findOne( { name: "chatroomH"} );
 				Chatrooms.update( 
 					{ _id: theRoom._id }, 
 					{ $push: { messages: msg } } 
 				)
 				
-				//console.log("after pushing msg to chatroomA.messages array");
-				//console.log(chatroomA.messages);
-				//console.log(chatroomA);
-				//console.log(Messages);
-				console.log(Chatrooms);
+				console.log("the room is ", theRoom);
+				console.log("the room id is ", theRoom._id);
 				
-				//
-				/* What the code was before 
-				Messages.insert({
-					name: name,
-					message: message.value,
-					time: Date.now(),
-					room: null
-				});
-				*/
+				/* What the code was before*/ 
+				// Messages.insert({
+				// 	name: name,
+				// 	message: message.value,
+				// 	time: Date.now(),
+				// 	room: null
+				// });
+				
 
 				document.getElementById('message').value = '';
 				message.value = '';
@@ -100,5 +94,5 @@ var Chatroom = function(name) {
 	this.messages = []; // empty array
 }
 
-var chatroomE = new Chatroom("chatroomE");
-console.log("created chatroomE");
+// var chatroomE = new Chatroom("chatroomE");
+// console.log("created chatroomE");
