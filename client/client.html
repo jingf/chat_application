@@ -6,7 +6,7 @@
   {{> loginButtons align="right"}}<br>
   <h1>Chat Application</h1>
   {{> welcome}}
-  {{> input}} 
+  {{> input}}
   {{> room}}
   {{> messages}}
 </body>
@@ -20,11 +20,11 @@
 </template>
 
 <template name="input">
-	<p>Message: <input type="text" id="message"></p>
+  <p>Message: <input type="text" id="message"></p>
 </template>
 
 <template name="messages">
-	{{#each messages}}
-		<strong>{{name}}:</strong> {{message}}<br>
-	{{/each}}
+  {{#each messages}}
+    <strong>{{name}}:</strong> {{message}}<br>
+  {{/each}}
 </template>
