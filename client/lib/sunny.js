@@ -99,10 +99,6 @@ Red = (function() {
   // ============================================================
 
   var Constr = {
-    id : function(id) {
-      return (id instanceof jQuery) ? id.attr('data-record-id') : id;
-    },
-
     extendProto : function(superFunc) {
       var constr = function() {};
       constr.prototype = superFunc.prototype;
@@ -111,16 +107,23 @@ Red = (function() {
 
     extendSig : function(name, superConstr, paramsStr, superArgsStr, body) {
       var funcStr = "f=function " + name + "(" + paramsStr + "){\n";
+
+      var cstr = "{writable: true, value: arguments.callee}";
+      funcStr +=
+         "  if (this.redConstructor === undefined) {\n" +
+         "    Object.defineProperty(this, 'redConstructor', " + cstr + ");\n" +
+         "    Object.defineProperty(this, 'constructor', " + cstr + ");\n";
+      if (superConstr) {
+        var sup = "{writable: true, value: superConstr}";
+        funcStr +=
+         "    Object.defineProperty(this, 'superConstructor', " + sup + ");\n";
+      }
+      funcStr +=
+         "  }\n";
       if (superConstr)
         funcStr += "  superConstr.call(this, " + superArgsStr + ");\n";
       if (body)
-        funcStr += "  " + body + "\n";
-      var cstr = "{writable: true, value: arguments.callee}";
-      funcStr += "  Object.defineProperty(this, 'constructor', " + cstr + ");\n";
-      if (superConstr) {
-        var sup = "{writable: true, value: superConstr}";
-        funcStr += "  Object.defineProperty(this, 'superConstructor', " + sup + ");\n";
-      }
+        funcStr += body + "\n";
       funcStr += "}";
       var c = eval(funcStr);
       if (superConstr)
@@ -132,12 +135,45 @@ Red = (function() {
       if (superRecordConstr === undefined) superRecordConstr = Red.Model.Record;
       var c;
       if (superRecordConstr === null) {
-        var body = "this['id']=id;";
-        c = Constr.extendSig(name, null, "id", null, body);
+        var body =
+            "  Object.defineProperty(this, 'props', {enumerable: true, value: {}});\n" +
+            "  this['id'] = id; \n" +
+            "  if (objProps !== undefined) \n" +
+            "    for (var p in objProps) this.props[p] = objProps[p]; ";
+        c = Constr.extendSig(name, null, "id, objProps", null, body);
       } else {
-        c = Constr.extendSig(name, superRecordConstr, "id", "Constr.id(id)");
+        c = Constr.extendSig(name, superRecordConstr, "id, objProps", "id, objProps");
       }
-      c.isRecordConstr = true;
+      Object.defineProperty(c, "isRecordConstr", { value: true });
+      Object.defineProperty(c, "all", {
+        value: function(opts) {
+          if (this.meta !== undefined) {
+            return this.meta.__repr__.find({}, opts);
+          } else {
+            return [];
+          }
+        }
+      });
+      Object.defineProperty(c, "create", {
+        value: function(objProps) {
+          var props = objProps || {};
+          id = this.meta.__repr__.insert(props);
+          var ans = new this(id, props);
+          return ans;
+        }
+      });
+      Object.defineProperty(c, "findOne", {
+        value: function(a1,a2,a3,a4,a5,a6,a7,a8,a9) {
+          var ret = this.meta.__repr__.findOne(a1,a2,a3,a4,a5,a6,a7,a8,a9);
+          return Utils.m2s(this, ret);
+        }
+      });
+      // for (var m in {find:'', findOne:''}) {
+      //   var f = function(a1,a2,a3,a4,a5,a6,a7,a8,a9){
+      //     return this.meta.__repr__[m](a1,a2,a3,a4,a5,a6,a7,a8,a9);
+      //   };
+      //   Object.defineProperty(c, m, { value: f });
+      // }
       return c;
     },
 
@@ -151,6 +187,9 @@ Red = (function() {
         c = Constr.extendSig(name, superEventConstr, "params", "params");
       }
       c.isEventConstr = true;
+      Object.defineProperty(c, "trigger", {
+        value: function(params) { new this(params).trigger(); }
+      });
       return c;
     }
   };
@@ -212,6 +251,10 @@ Red = (function() {
   // ============================================================
 
   var Utils = {
+    m2s : function (sunnyCls, meteorObj) {
+      return new sunnyCls(meteorObj._id, meteorObj);
+    },
+
     defaultTo : function(val, defaultVal) {
       if (typeof(val) === "undefined") {
         return defaultVal;
@@ -788,10 +831,24 @@ Red = (function() {
     ///////////////////////////////////////////////////////
     this.Record = Constr.record("Record", null);
     jQuery.extend(this.Record.prototype, {
-      is_record : true
+      is_record : true,
+      readField : function(fldName) {
+        // return this.props[fldName];
+        return this.meta().__repr__.findOne(this.id)[fldName];
+      },
+      writeField: function(fldName, fldValue) {
+        this.props[fldName] = fldValue;
+        mod = {};
+        mod[fldName] = fldValue;
+        this.meta().__repr__.update(
+          { _id:  this.id },
+          { $set: mod }
+        );
+      }
     });
     Object.defineProperty(this.Record.prototype, "meta", {
       value: function() { return this.constructor.meta; }
+      // get: function() { return this.constructor.meta; }
     });
 
     ///////////////////////////////////////////////////////
@@ -799,82 +856,18 @@ Red = (function() {
     jQuery.extend(this.Event.prototype, {
       is_event : true,
 
-      cancel : function() { this.canceled = true; },
-
-      fire : function(cb) {
-        cb = Utils.defaultTo(cb, function(response) {});
-        if (this.viaForm) {
-          return this.fireViaForm(this.viaForm, cb);
-        } else {
-          return this.fireDirectly(cb);
-        }
+      readField : function(fldName) {
+        return this.params[fldName];
       },
 
-      /* ----------------------------------------------------------------
-       *
-       * Fires this event by submitting a form to this events action URL.
-       *
-       * This is used mainly for file uploads, when an event requires
-       * a file parameter.
-       *
-       * If the form has a 'target' attribute pointing to an iframe,
-       * it binds an 'onload' handler to that iframe, which simply
-       * emits a 'done' event (through the returned MyXHR object) when
-       * the iframe is loaded.
-       *
-       * ---------------------------------------------------------------- */
-      fireViaForm : function(form, cb) {
-        cb = Utils.defaultTo(cb, function(response) {});
-        Object.defineProperty(this, "fired", {value: true});
-
-        if (!(typeof(form) === "object")) { form = $(form); }
-
-        var iframe = $("#" + form.attr("target"));
-        var myXHR = new MyXHR();
-        iframe.load(function(){
-          myXHR.fireDone(iframe);
-          myXHR.fireAlways(iframe);
-          $(iframe).parent().detach();
-        });
-        form.attr("action", this.actionUrl());
-        form.submit();
-        return myXHR;
+      writeField: function(fldName, fldValue) {
+        this.params[fldName] = fldValue;
       },
 
-      /* ----------------------------------------------------------------
-       * Fires an Ajax POST request to this events action URL.
-       *
-       * Returns the same XHR object returned by jQuery.post.
-       * ---------------------------------------------------------------- */
-      fireDirectly : function(cb) {
-        cb = Utils.defaultTo(cb, function(response) {});
-        Object.defineProperty(this, "fired", {value: true});
-
-        var url = this.actionUrl();
-        return jQuery.post(url, cb);
+      trigger: function() {
+        return this.meta().ensures.apply(this);
       },
 
-      /* ----------------------------------------------------------------
-       *
-       * Returns an URL where where a POST request should be sent to
-       * trigger this event.  This URL encodes the event name and the
-       * values of event parameters.
-       *
-       * ---------------------------------------------------------------- */
-      actionUrl : function() {
-        var urlParams = {
-            event : this.meta().name,
-            params : this.params
-        };
-        // TODO: auth token?
-        return "/event?" + Serializer.param(urlParams);
-      },
-
-      /* ----------------------------------------------------------------
-       *
-       * Returns the meta object for type of event.
-       *
-       * ---------------------------------------------------------------- */
       meta : function() {
         return this.constructor.meta;
       }

@@ -177,6 +177,7 @@ User.meta = new Red.Model.RecordMeta({
   });
 
 Msg.meta = new Red.Model.RecordMeta({
+    "__repr__": new Meteor.Collection('Msg'),
     "name": "Msg",
     "relative_name": "Msg",
     "sigCls": Msg,
@@ -222,6 +223,7 @@ Msg.meta = new Red.Model.RecordMeta({
   });
 
 ChatRoom.meta = new Red.Model.RecordMeta({
+    "__repr__": new Meteor.Collection('ChatRoom'),
     "name": "ChatRoom",
     "relative_name": "ChatRoom",
     "sigCls": ChatRoom,
@@ -1074,5 +1076,71 @@ SendMsg.meta = new Red.Model.EventMeta({
         "inv": null
       })
     ],
-    "inv_fields": []
+    "inv_fields": [],
+
+    "ensures": function() {
+      var sender = Meteor.user() ? Meteor.user().emails[0].address : "Anonymous";
+      var msg = Sunny.Msg.create({sender:sender, text:this.msgText, time:Date.now()});
+
+      // TODO: add msg to room
+      return msg;
+    }
   });
+
+Sunny = {
+  /* ------------- record signatures ------------- */
+
+  AuthUser: AuthUser,
+  User: User,
+  Msg:  Msg,
+  ChatRoom: ChatRoom,
+  WebClient: WebClient,
+  WebServer: WebServer,
+  AuthClient: AuthClient,
+  AuthServer: AuthServer,
+  Client: Client,
+  Server: Server,
+
+  /* ------------- event signatures ------------- */
+
+  ClientConnected: ClientConnected,
+  ClientDisconnected: ClientDisconnected,
+  Register: Register,
+  SignIn: SignIn,
+  SignOut: SignOut,
+  Unregister: Unregister,
+  CreateRecord: CreateRecord,
+  CreateRecordAndLink: CreateRecordAndLink,
+  LinkToRecord: LinkToRecord,
+  UpdateRecord: UpdateRecord,
+  DeleteRecord: DeleteRecord,
+  DeleteRecords: DeleteRecords,
+  CreateRoom: CreateRoom,
+  JoinRoom: JoinRoom,
+  SendMsg: SendMsg
+};
+
+for (var prop in Sunny) {
+  var cls = Sunny[prop];
+  if (cls.meta === undefined) continue;
+  for (var fldIdx = 0; fldIdx < cls.meta.fields.length; fldIdx++) {
+    var fld = cls.meta.fields[fldIdx];
+    var fldName = fld.name;
+    var getter = 'function f()    { return this.readField("' + fldName + '");}; f';
+    var setter = 'function f(val) { this.writeField("' + fldName + '", val);};  f';
+    // var gf = eval(str1);
+    // var sf = eval(str2);
+    // var str = 'Object.defineProperty(cls.prototype, fldName, {' +
+    //   'enumerable: true,' +
+    //   'get: function ()    { return this["sender"];},' +
+    //   'set: function (val) { this["sender"] = val;}' +
+    // '})';
+    // console.log(str);
+    // eval(str);
+    Object.defineProperty(cls.prototype, fldName , {
+      enumerable: true,
+      get: eval(getter),
+      set: eval(setter)
+    });
+  }
+}

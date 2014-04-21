@@ -24,7 +24,7 @@
 </template>
 
 <template name="messages">
-  {{#each messages}}
-    <strong>{{name}}:</strong> {{message}}<br>
+  {{#each Msg}}
+    [{{fmtTime time}}] <strong>{{sender}}:</strong> {{text}}<br>
   {{/each}}
 </template>
