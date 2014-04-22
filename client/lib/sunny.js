@@ -1,3 +1,5 @@
+Sunny = {};
+
 Red = (function() {
   // ============================================================
   // private stuff
@@ -25,6 +27,68 @@ Red = (function() {
 
     check_defined : function(x, msg) {
       if (x === undefined) throw Error(msg);
+    },
+
+    toSunnyObj : function(fld, val) {
+      if (fld.primitive) {
+        return val;
+      } else {
+        return me.toSunnyObj2(fld.type, val);
+      }
+    },
+
+    toSunnyObj2 : function(sunnyCls, val) {
+      var meteorObj = sunnyCls.meta.__repr__.findOne(val);
+      return Utils.m2s(sunnyCls, meteorObj);
+    },
+
+    toSunnyList : function(obj, fld, val) {
+      var ans = [];
+      ans["__sunny__"] = {
+        owner: obj,
+        field: fld
+      };
+      for (var i = 0; i < val.length; i++) {
+        ans.push(me.toSunnyObj(fld, val[i]));
+      }
+
+      // redefine push
+      var arrPush = ans.push;
+      ans.push = function(elem) {
+        arrPush.call(this, elem);
+        var sunnyObj = this.__sunny__.owner;
+        var sunnyFld = this.__sunny__.field;
+        var mod = {};
+        mod[sunnyFld.name] = sunnyFld.primitive ? elem : elem.id;
+        sunnyObj.meta().__repr__.update(
+          {   _id: sunnyObj.id },
+          { $push: mod }
+        );
+      };
+
+      //TODO: what else to redefine??
+
+      return ans;
+    },
+
+    toSunnyList2 : function(sunnyCls, val) {
+      var ans = [];
+      for (var i = 0; i < val.length; i++) {
+        ans.push(me.toSunnyObj2(sunnyCls, val[i]));
+      }
+      return ans;
+    },
+
+    wrap : function(obj, fld, val) {
+      if (fld.scalar) {
+        return val;
+      } else {
+        if (val === undefined || val === null) {
+          val = [];
+          obj.writeField(fld.name, val);
+        }
+        return me.toSunnyList(obj, fld, val);
+      }
     }
   };
 
@@ -53,45 +117,6 @@ Red = (function() {
     create      : function(constr, args) { return new constr(args); },
     createRecord: function(name, id)     { return this.create(this.record(name), id); },
     createEvent : function(name, params) { return this.create(this.event(name), params); }
-  };
-
-
-  // ============================================================
-  //  Simulates jQuery's jqXHR type.
-  // ============================================================
-
-  var MyXHR = function() {
-    var proto = {
-      doneFuncs: [],
-      failFuncs: [],
-      alwaysFuncs: [],
-
-      done:   function(doneFunc)   {
-        this.doneFuncs.push(doneFunc);
-        return this;
-      },
-
-      fail:   function(failFunc)   {
-        this.failFuncs.push(failFunc);
-        return this;
-      },
-
-      always: function(alwaysFunc) {
-        this.alwaysFuncs.push(alwaysFunc);
-        return this;
-      },
-
-      fireEach: function(funcs, args) {
-        for (var i=0; i < funcs.length; i++) {
-          funcs[i](args);
-        }
-      },
-
-      fireDone: function(args)   { this.fireEach(this.doneFuncs, args); },
-      fireFail: function(args  ) { this.fireEach(this.failFuncs, args); },
-      fireAlways: function(args) { this.fireEach(this.alwaysFuncs, args); }
-    };
-    jQuery.extend(this, proto);
   };
 
   // ============================================================
@@ -148,7 +173,8 @@ Red = (function() {
       Object.defineProperty(c, "all", {
         value: function(opts) {
           if (this.meta !== undefined) {
-            return this.meta.__repr__.find({}, opts);
+            var mList = this.meta.__repr__.find({}, opts).fetch();
+            return me.toSunnyList2(this, mList);
           } else {
             return [];
           }
@@ -297,102 +323,6 @@ Red = (function() {
 
      /* ----------------------------------------------------------------
       *
-      * Asynchronously fires up a server-side action.
-      *
-      * Function used for this async call is
-      *
-      *   - `hash.method'         when hash.method is a function
-      *   - jQuery.<hash.method>  when hash.method is a string
-      *   - jQuery.get            otherwise
-      *
-      * If `hash.url' is present, it simply send a request to that URL.
-      * Otherwise, it builds the URL from a number of Rails-like
-      * parameters:
-      *
-      *   - controller
-      *   - action
-      *   - format
-      *   - params
-      *
-      * The URL pattern is
-      *
-      *   '/${controller}#${action}.#{format}?#{params}'
-      *
-      * @param requestOpts: {
-      *          url: string,
-      *          controller: string,
-      *          format: string,
-      *          action: string,
-      *          params: object,
-      *          method: string || function,
-      *        }
-      *
-      * @return jqXHR
-      *
-      * ---------------------------------------------------------------- */
-     remoteAction : function(requestOpts) {
-       if (typeof(requestOpts) === 'undefined') { requestOpts = {}; }
-       var url = "";
-       var method = jQuery.get;
-       if (typeof(requestOpts) === 'object') {
-         url = "/";
-         if (requestOpts.controller) url += requestOpts.controller;
-         if (requestOpts.action) url += '#' + requestOpts.action;
-         if (requestOpts.format) url += '.' + requestOpts.format;
-         if (requestOpts.params) url += '?' + Serializer.param(requestOpts.params);
-         if (typeof(requestOpts.method) === "string") {
-           method = eval('jQuery.' + requestOpts.method);
-         } else if (typeof(requestOpts.method) === "function") {
-           method = requestOpts.method;
-         }
-       } else {
-         url = "" + requestOpts;
-       }
-       return method(url, function() {});
-     },
-
-     /* ----------------------------------------------------------------
-      *
-      * Asynchrounously fires up a request to remotely render a given
-      * record and send back the rendered HTML.
-      *
-      * By default sends a GET request to the "recordRenderer"
-      * controller with parameters including the given record and the
-      * rendering options.  These request options can be overriden
-      * by the user.
-      *
-      * @param record [Red.Record]  - record to be rendered
-      * @param renderOpts [object]  - server-side rendering options
-      * @param requestOpts [object] - remoteAction request options
-      *
-      * @return jqXHR
-      *
-      * ---------------------------------------------------------------- */
-     remoteRenderRecord : function(record, renderOpts, requestOpts) {
-       if (typeof(renderOpts) === 'undefined')  { renderOpts = {}; }
-       if (typeof(requestOpts) === 'undefined') { requestOpts = {}; }
-       var renderEvent = new RenderRecord({
-         record: record,
-         options: jQuery.extend({
-           autoview: false
-         }, renderOpts)
-       });
-       var xhr = new MyXHR();
-       renderEvent.fire()
-         .done(function(response)   {
-           var elem = $("<span></span>");
-           elem.html(response.ans);
-           var ret = elem.children().size() === 1 ? $(elem.children()[0]) : elem;
-           Red.Autoview.processAutoview(ret);
-           xhr.fireDone(ret);
-         })
-         .fail(function(response)   { xhr.fireFail(response); })
-         .always(function(response) { xhr.fireAlways(response); });
-       return xhr;
-     },
-
-     /* ----------------------------------------------------------------
-      *
       * Reads the attribute value from a jQuery element, with some
       * additional processing.
       *
@@ -442,156 +372,6 @@ Red = (function() {
      readData : function(elem, name) {
        return Utils.readParamValue(elem, "data-" + name);
      },
-
-    /* ----------------------------------------------------------------
-     *
-     * Takes an array of "actions" (`actions') and a hash of callbacks
-     * (`cb').  Executes one action at a time, and as soon as one
-     * action fails it calls `cb.fail' and stops the process.  Only if
-     * all actions succeed, `cb.done' is called.  At the end of the
-     * process (regardless of whether it succeeded or failed)
-     * `cb.always' is called.
-     *
-     * An "action" is a no-arg function which return an XHR kind of
-     * object (e.g., `jqXHR', `Red.MyXHR' or anything that allows
-     * "done", "fail" and "always" callbacks to be assigned).
-     *
-     * @param actions [array(function)] - a list of actions
-     * @param cb : {
-     *          done:   function
-     *          fail:   function
-     *          always: function
-     *        }
-     *
-     * @return undefined
-     *
-     * ---------------------------------------------------------------- */
-    chainActions : function(actions, cb) {
-      return function() {
-        if (actions.length == 0) throw new Error("0 actions not allowed");
-        var action = actions.shift();
-        var doneFunc = null;
-        if (actions.length == 0)
-          doneFunc = function(r) {
-            if (cb.done) cb.done(r);
-            if (cb.always) cb.always(r);
-          };
-        else
-          doneFunc = function(r) { Utils.chainActions(actions, cb)(); };
-        action()
-          .done(doneFunc)
-          .fail(function(r)   { if (cb.fail) cb.fail(r);});
-      };
-    },
-
-    /* ----------------------------------------------------------------
-     *
-     * Implements a transition protocol for updating a DOM
-     * element. This protocol looks something like this.
-     *
-     *  -- addClass(updating, upStartDur)
-     *    `-- action()
-     *       `-- <action done>
-     *          `-- removeClass(updating, upEndDur)
-     *             `-- addClass(update-ok, duration)
-     *                `-- hash.done()
-     *                 -- sleep(timeout)
-     *                   `-- removeClass(updateOk)
-     *       `-- <action fail>
-     *          `-- removeClass(updating, upEndDur)
-     *             `-- addClass(update-fail, duration)
-     *                `-- hash.fail()
-     *                 -- sleep(timeout)
-     *                   `-- removeClass(updateFail)
-     *       `-- <whatever>
-     *          `-- removeClass(updating, upEndDur)
-     *             `-- hash.always()
-     *
-     *
-     * This allows animations to be specified via the CSS
-     * classes. First "${cls}-updating" is added to the element and is
-     * animated for the `upStartDur' number of milliseconds, next the
-     * action (`opts.action' or chained `opts.actions') is issued,
-     * upon whose completion the "${cls}-updating" class is removed,
-     * "${cls}-update-<ok/fail>" class is animated for the
-     * `opts.duration' number of milliseconds, user callback
-     * (`opts.done' or `opts.fail') is called, and finally after a
-     * timeout (`opts.timeout') the ok/fail class is removed.
-     *
-     * @param $elem : jQuery - a jQuery element
-     * @param cb : {
-     *          action:  function        - action to be performed
-     *          actions: array(function) - a chain of actions to be performed
-     *          upStartDur: number       - begin updating animation duration
-     *          upEndDur: number         - end updating animation duration
-     *          duration: number         - begin ok/fail animation duration
-     *          timeout: number          - time to wait before removing the ok/fail class
-     *          done:   function         - ok callback
-     *          fail:   function         - fail callback
-     *          always: function         - always callback
-     *        }
-     *
-     * @return undefined
-     *
-     * ---------------------------------------------------------------- */
-    asyncUpdate : function($elem, cls, opts) {
-      var oldHtml = $elem.html();
-      var updatingCls = cls + "-updating";
-      var okCls = cls + "-update-ok";
-      var failCls = cls + "-update-fail";
-
-      var duration = opts.duration || 200;
-      var timeout = opts.timeout || 800;
-      var upStartDur = opts.upStartDur || opts.duration || "fast";
-      var upEndDur = opts.upEndDur || opts.duration || 0;
-      var actions = opts.actions || [opts.action];
-
-      var myAddClass = function(el, cls, speed, cont) {
-        if (speed) { el.addClass(cls, speed, cont); }
-        else       { el.addClass(cls); if (cont) cont(); }
-      };
-
-      var myRemoveClass = function(el, cls, speed, cont) {
-        if (speed) { el.removeClass(cls, speed, cont); }
-        else       { el.removeClass(cls); if (cont) cont(); }
-      };
-
-      myAddClass($elem, updatingCls, upStartDur, function(){
-        Utils.chainActions(actions, {
-          done: function(r) {
-            myRemoveClass($elem, updatingCls, upEndDur, function() {
-              var cont = function() {
-                myAddClass($elem, okCls, duration, function() {
-                  //setTimeout(function() {myRemoveClass($elem, okCls);}, timeout);
-                });
-              };
-              cont.cancel = false;
-              if (opts.done) {
-                opts.done(r, cont);
-                if (!cont.cancel)
-                  cont();
-              } else {
-                $elem.html(r);
-                cont();
-              }
-            });
-          },
-          fail: function(r) {
-            myRemoveClass($elem, updatingCls, upEndDur, function() {
-              if (opts.fail) { opts.fail(r); }
-              myAddClass($elem, failCls, duration, function() {
-                setTimeout(function() {myRemoveClass($elem, failCls);}, timeout);
-              });
-            });
-          },
-          always: function(r) {
-            myRemoveClass($elem, updatingCls, upEndDur, function() {
-              if (opts.always) { opts.always(r); }
-            });
-          }
-        })();
-      });
-    },
 
     /* ----------------------------------------------------------------
      *
@@ -786,7 +566,14 @@ Red = (function() {
     };
     this.RecordMeta.prototype = {
       superRecord: function() { return this.parentSig; },
-      subRecords: function() { return this.subsigs; }
+      subRecords: function() { return this.subsigs; },
+      field: function(name) {
+        for (var i = 0; i < this.fields.length; i++) {
+          if (this.fields[i].name == name)
+            return this.fields[i];
+        }
+        return undefined;
+      }
     };
 
     ///////////////////////////////////////////////////////
@@ -832,11 +619,13 @@ Red = (function() {
     this.Record = Constr.record("Record", null);
     jQuery.extend(this.Record.prototype, {
       is_record : true,
-      readField : function(fldName) {
+      readField : function(fldName, opts) {
         // return this.props[fldName];
-        return this.meta().__repr__.findOne(this.id)[fldName];
+        var fld = this.meta().field(fldName);
+        var ans = this.meta().__repr__.findOne(this.id)[fldName];
+        return me.wrap(this, fld, ans);
       },
-      writeField: function(fldName, fldValue) {
+      writeField: function(fldName, fldValue, opts) {
         this.props[fldName] = fldValue;
         mod = {};
         mod[fldName] = fldValue;
@@ -875,233 +664,8 @@ Red = (function() {
   };
 
 
-  // ===============================================================
-  //   publish subscribe
-  // ===============================================================
-  var RedEvents = function() {
-    var proto = {
-      publish_status_kind : function(kind, msg) {
-        Red.publish({
-          "type" : "status_message",
-          "payload" : {
-            "kind" : kind,
-            "msg" : msg
-          }
-        });
-      },
-
-      publish_status  : function(msg) { proto.publish_status_kind("status", msg); },
-      publish_warning : function(msg) { proto.publish_status_kind("warning", msg); },
-      publish_error   : function(msg) { proto.publish_status_kind("error", msg); },
-
-      subscribe_message_kind : function(kind, func) {
-        Red.subscribe(function(data) {
-          if (data.payload && data.payload.kind === kind) func(data, data.payload);
-        });
-      },
-
-      subscribe_event_completed : function(eventName, func) {
-        proto.subscribe_message_kind("event_completed", function(data, payload) {
-          if (payload.event.name === eventName) func(data, payload.ans);
-        });
-      }
-    };
-    return $.extend(this, proto);
-  };
-
-  // ===============================================================
-  //   publish subscribe
-  // ===============================================================
-  var RedAutoview = function() {
-    var thisPrivate = {
-      attrMap : {},
-
-      sweepDom : function($from, $to, html) {
-        if (!($from.size() == 1 && $to.size() == 1)) {
-          var msg = "inconsistent start/end tags: #startTag = " +
-                $from.size() + ", #endTag = " + $to.size();
-          console.error(msg);
-          return;
-        }
-        var current = $from[0];
-        var end = $to[0];
-        if (current.parentNode !== end.parentNode) {
-          console.error("From and to nodes not at the same level");
-          console.debug("From: ");
-          console.debug(current);
-          console.debug("To: ");
-          console.debug(end);
-          return;
-        }
-        //NOTE: from.nextUntil(to).detach() is not good enough since it
-        //      skips over text nodes.
-        var toDetach = [];
-        while (current !== end) {
-          toDetach.push(current);
-          current = current.nextSibling;
-        }
-        $(toDetach.slice(1, toDetach.length)).detach();
-        $from.before(html);
-        $from.detach();
-        $to.detach();
-      },
-
-      searchDom : function(node_id, html) {
-        // check attrMap first
-        var startTag = "reds_" + node_id;
-        var endTag = "rede_" + node_id;
-
-        var attrInfo = thisPrivate.attrMap[node_id];
-        if (attrInfo) {
-          var attr = attrInfo.attr;
-          var attrVal = attrInfo.origAttrVal;
-          var startTagStr = "<" + startTag + ">";
-          var endTagStr = "</" + endTag + ">";
-          var startIdx = attrVal.indexOf(startTagStr);
-          var endIdx = attrVal.indexOf(endTagStr);
-          me.assert(startIdx !== -1 && endIdx !== -1);
-          var newValue  = attrVal.substring(0, startIdx) + html +
-                          attrVal.substring(endIdx + endTagStr.length);
-          // console.debug("updated attribute '" + attr.name + "' from '" +
-          //               attr.nodeValue + "' to '" + newValue + "'");
-          attr.nodeValue = newValue;
-          proto.processAttribute(attrInfo.node, attr);
-        } else {
-          thisPrivate.sweepDom($(startTag), $(endTag), html);
-        }
-
-        // var elements = document.getElementsByTagName("*");
-        // for (var i = 0; i < elements.length; i++) {
-        //   var element = elements[i];
-        //   if (element.tagName.toLowerCase() === startTag) {
-        //     thisPrivate.sweepDom($(element), $("rede_" + node_id), html);
-        //     return;
-        //   }
-        //   var attr = element.attributes;
-        //   for (var j = 0; j < attr.length; j++) {
-        //     var attrVal = attr[j].nodeValue;
-        //     var startIdx = attrVal.indexOf(startTagStr);
-        //     if (startIdx != -1) {
-        //       var endIdx = attrVal.indexOf(endTagStr);
-        //       if (endIdx != -1) {
-        //         attr[j].nodeValue = attrVal.substring(0, startIdx) + html +
-        //                             attrVal.substring(endIdx + endTagStr.length);
-        //         return;
-        //       } else {
-        //         console.error("start but not end tag found in attribute " + attrVal);
-        //       }
-        //     }
-        //   }
-        // }
-      },
-
-      assocTagToAttribute : function(node, attr, tagId, origAttrVal) {
-        console.debug("associated tag " + tagId + " with " +
-                       node.tagName + "." + attr.name);
-        thisPrivate.attrMap[tagId] = {
-          node: node,
-          attrName: attr.name,
-          attr: attr,
-          origAttrVal: origAttrVal
-        };
-      }
-    };
-
-    var proto = {
-
-     /* ----------------------------------------------------------------
-      *
-      * Searches for elements with attributes containing <reds_?> and
-      * <rede_?> tags, removes those tags from the attribute value but
-      * remembers the association between the two.
-      *
-      * @return undefined
-      *
-      * ---------------------------------------------------------------- */
-      processAttribute : function(node, attr) {
-        var attrVal = attr.nodeValue;
-        var currVal = attrVal;
-        while (true) {
-          var startTagMatch = currVal.match(/<reds_(\d+)><\/reds_(\d+)>/);
-          if (startTagMatch) {
-            me.assert(startTagMatch.length === 3);
-            var tagId = startTagMatch[1];
-            me.assert(tagId === startTagMatch[2]);
-            var startTag = startTagMatch[0];
-            var endTag = '<rede_' + tagId + '></rede_' + tagId + '>';
-            var endTagIdx = currVal.indexOf(endTag);
-            me.assert(endTagIdx !== -1);
-            thisPrivate.assocTagToAttribute(node, attr, tagId, currVal);
-            currVal = currVal.replace(startTag, "").replace(endTag, "");
-          } else {
-            break;
-          }
-        }
-        if (currVal !== attrVal) {
-          console.debug("changed attribute value from '" +
-                        attrVal + "' to '" + currVal + "'");
-          attr.nodeValue = currVal;
-        }
-      },
-
-     /* ----------------------------------------------------------------
-      *
-      * Searches for elements with attributes containing <reds_?> and
-      * <rede_?> tags, removes those tags from the attribute value but
-      * remembers the association between the two.
-      *
-      * @return undefined
-      *
-      * ---------------------------------------------------------------- */
-      processAutoview : function($elem) {
-        var elements = $elem.find("*");
-        for (var i = 0; i < elements.length; i++) {
-          var element = elements[i];
-          var attr = element.attributes;
-          for (var j = 0; j < attr.length; j++) {
-            proto.processAttribute(element, attr[j]);
-          }
-        }
-      },
-
-      updateReceived : function(data) {
-        var updateStart = new Date().getTime();
-        me.check_defined(data.type, "malformed JSON update: field 'type' not found");
-
-        if (data.type === "node_update") {
-
-          me.check_defined(data.payload,
-              "field 'payload' not found in a 'node_update' message");
-          me.check_defined(data.payload.node_id,
-              "field 'payload.node_id' not found in a 'node_update' message");
-          me.check_defined(data.payload.inner_html,
-              "field 'payload.inner_html' not found in a 'node_update' message");
-
-          thisPrivate.searchDom(data.payload.node_id, data.payload.inner_html);
-
-        } else if (data.type === "body_update") {
-
-          me.check_defined(data.payload,
-              "field 'payload' not found in a 'body_update' message");
-          me.check_defined(data.payload.html,
-              "field 'payload.html' not found in a 'body_update' message");
-          $('body').html(data.payload.html);
-
-        } else {
-          //throw Error("unknown update message type: " + data.type)
-        }
-
-        var updateEnd = new Date().getTime();
-        var time = updateEnd - updateStart;
-        console.debug('Total update execution time: ' + time + "ms");
-      }
-    };
-    return $.extend(this, proto);
-  };
-
   var Red = {
 
-    Events     : new RedEvents(),
     Meta       : new RedMeta(),
     Model      : new RedModel(),
 
@@ -1109,8 +673,6 @@ Red = (function() {
     Utils      : jQuery.extend({}, Utils),
     Renderer   : jQuery.extend({}, Rendering),
     Serializer : jQuery.extend({}, Serializer),
-
-    Autoview   : new RedAutoview(),
 
     // ===============================================================
     //   handlers
@@ -1123,6 +685,44 @@ Red = (function() {
 
     updateReceived : function(data) {
       return Red.Autoview.updateReceived(data);
+    },
+
+    initApp: function() {
+      // init Sunny obj
+      for (var r in Red.Meta.records) {
+        var rec = Red.Meta.records[r];
+        Sunny[rec.name] = rec;
+      }
+
+      for (var e in Red.Meta.events) {
+        var ev = Red.Meta.events[e];
+        Sunny[ev.name] = ev;
+      }
+
+      // init field getters/setters
+      for (var prop in Sunny) {
+        var cls = Sunny[prop];
+        if (cls.meta === undefined) continue;
+        for (var fldIdx = 0; fldIdx < cls.meta.fields.length; fldIdx++) {
+          var fld = cls.meta.fields[fldIdx];
+          var fldName = fld.name;
+          var gfun = 'function f(o)      { return this.readField("' + fldName + '", o);}; f';
+          var sfun = 'function f(val, o) { this.writeField("' + fldName + '", val, o);};  f';
+          Object.defineProperty(cls.prototype, fldName , {
+            enumerable: true,
+            get: eval(gfun),
+            set: eval(sfun)
+          });
+          Object.defineProperty(cls.prototype, "get_" + fldName , {
+            enumerable: true,
+            value: eval(gfun)
+          });
+          Object.defineProperty(cls.prototype, "set_" + fldName , {
+            enumerable: true,
+            value: eval(sfun)
+          });
+        }
+      }
     }
   };
 

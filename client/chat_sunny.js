@@ -32,6 +32,7 @@ var SendMsg = Red.Constr.event("SendMsg", Red.Model.Event);
 /* ------------- record meta ------------- */
 
 AuthUser.meta = new Red.Model.RecordMeta({
+    "__repr__": new Meteor.Collection('AuthUser'),
     "name": "RedLib::Web::Auth::AuthUser",
     "relative_name": "AuthUser",
     "sigCls": AuthUser,
@@ -49,7 +50,10 @@ AuthUser.meta = new Red.Model.RecordMeta({
         "belongsToParent": false,
         "transient": false,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "email",
@@ -60,7 +64,10 @@ AuthUser.meta = new Red.Model.RecordMeta({
         "belongsToParent": false,
         "transient": false,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "password_salt",
@@ -71,7 +78,10 @@ AuthUser.meta = new Red.Model.RecordMeta({
         "belongsToParent": false,
         "transient": false,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "password_hash",
@@ -82,7 +92,10 @@ AuthUser.meta = new Red.Model.RecordMeta({
         "belongsToParent": false,
         "transient": false,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "remember_token",
@@ -93,7 +106,10 @@ AuthUser.meta = new Red.Model.RecordMeta({
         "belongsToParent": false,
         "transient": false,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "password",
@@ -104,7 +120,10 @@ AuthUser.meta = new Red.Model.RecordMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       })
     ],
     "inv_fields": [new Red.Model.Field({
@@ -116,11 +135,15 @@ AuthUser.meta = new Red.Model.RecordMeta({
       "belongsToParent": false,
       "transient": false,
       "ordering": false,
-      "inv": function(){ return AuthClient.meta.fields[0];}
+      "inv": function(){ return AuthClient.meta.fields[0];},
+      "multiplicity": "lone",
+      "scalar": true,
+      "primitive": false
     })]
   });
 
 User.meta = new Red.Model.RecordMeta({
+    "__repr__": new Meteor.Collection('User'),
     "name": "User",
     "relative_name": "User",
     "sigCls": User,
@@ -137,7 +160,10 @@ User.meta = new Red.Model.RecordMeta({
       "belongsToParent": false,
       "transient": false,
       "ordering": false,
-      "inv": null
+      "inv": null,
+      "multiplicity": "lone",
+      "scalar": true,
+      "primitive": true
     })],
     "inv_fields": [
       new Red.Model.Field({
@@ -149,7 +175,10 @@ User.meta = new Red.Model.RecordMeta({
         "belongsToParent": false,
         "transient": false,
         "ordering": false,
-        "inv": function(){ return Msg.meta.fields[1];}
+        "inv": function(){ return Msg.meta.fields[1];},
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "chat_rooms_as_member",
@@ -160,7 +189,10 @@ User.meta = new Red.Model.RecordMeta({
         "belongsToParent": false,
         "transient": false,
         "ordering": false,
-        "inv": function(){ return ChatRoom.meta.fields[1];}
+        "inv": function(){ return ChatRoom.meta.fields[1];},
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "clients_as_user",
@@ -171,7 +203,10 @@ User.meta = new Red.Model.RecordMeta({
         "belongsToParent": false,
         "transient": false,
         "ordering": false,
-        "inv": function(){ return Client.meta.fields[0];}
+        "inv": function(){ return Client.meta.fields[0];},
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       })
     ]
   });
@@ -195,7 +230,10 @@ Msg.meta = new Red.Model.RecordMeta({
         "belongsToParent": false,
         "transient": false,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "sender",
@@ -206,7 +244,24 @@ Msg.meta = new Red.Model.RecordMeta({
         "belongsToParent": false,
         "transient": false,
         "ordering": false,
-        "inv": function(){ return User.meta.inv_fields[0];}
+        "inv": function(){ return User.meta.inv_fields[0];},
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
+      }),
+      new Red.Model.Field({
+        "name": "time",
+        "type": "Date",
+        "parent": Msg,
+        "default": null,
+        "synth": false,
+        "belongsToParent": false,
+        "transient": false,
+        "ordering": false,
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       })
     ],
     "inv_fields": [new Red.Model.Field({
@@ -218,7 +273,10 @@ Msg.meta = new Red.Model.RecordMeta({
       "belongsToParent": false,
       "transient": false,
       "ordering": false,
-      "inv": function(){ return ChatRoom.meta.fields[2];}
+      "inv": function(){ return ChatRoom.meta.fields[2];},
+      "multiplicity": "lone",
+      "scalar": true,
+      "primitive": false
     })]
   });
 
@@ -241,7 +299,10 @@ ChatRoom.meta = new Red.Model.RecordMeta({
         "belongsToParent": false,
         "transient": false,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "members",
@@ -252,7 +313,10 @@ ChatRoom.meta = new Red.Model.RecordMeta({
         "belongsToParent": false,
         "transient": false,
         "ordering": false,
-        "inv": function(){ return User.meta.inv_fields[1];}
+        "inv": function(){ return User.meta.inv_fields[1];},
+        "multiplicity": "set",
+        "scalar": false,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "messages",
@@ -263,7 +327,10 @@ ChatRoom.meta = new Red.Model.RecordMeta({
         "belongsToParent": true,
         "transient": false,
         "ordering": false,
-        "inv": function(){ return Msg.meta.inv_fields[0];}
+        "inv": function(){ return Msg.meta.inv_fields[0];},
+        "multiplicity": "set",
+        "scalar": false,
+        "primitive": false
       })
     ],
     "inv_fields": [new Red.Model.Field({
@@ -275,7 +342,10 @@ ChatRoom.meta = new Red.Model.RecordMeta({
       "belongsToParent": false,
       "transient": false,
       "ordering": false,
-      "inv": function(){ return Server.meta.fields[0];}
+      "inv": function(){ return Server.meta.fields[0];},
+      "multiplicity": "lone",
+      "scalar": true,
+      "primitive": false
     })]
   });
 
@@ -283,6 +353,7 @@ ChatRoom.meta = new Red.Model.RecordMeta({
 /* ------------- event meta ------------- */
 
 ClientConnected.meta = new Red.Model.EventMeta({
+    "__repr__": new Meteor.Collection('ClientConnected'),
     "name": "RedLib::Web::ClientConnected",
     "relative_name": "ClientConnected",
     "sigCls": ClientConnected,
@@ -302,7 +373,10 @@ ClientConnected.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "server",
@@ -313,13 +387,17 @@ ClientConnected.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       })
     ],
     "inv_fields": []
   });
 
 ClientDisconnected.meta = new Red.Model.EventMeta({
+    "__repr__": new Meteor.Collection('ClientDisconnected'),
     "name": "RedLib::Web::ClientDisconnected",
     "relative_name": "ClientDisconnected",
     "sigCls": ClientDisconnected,
@@ -339,7 +417,10 @@ ClientDisconnected.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "server",
@@ -350,13 +431,17 @@ ClientDisconnected.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       })
     ],
     "inv_fields": []
   });
 
 Register.meta = new Red.Model.EventMeta({
+    "__repr__": new Meteor.Collection('Register'),
     "name": "RedLib::Web::Auth::Register",
     "relative_name": "Register",
     "sigCls": Register,
@@ -376,7 +461,10 @@ Register.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "name",
@@ -387,7 +475,10 @@ Register.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "email",
@@ -398,7 +489,10 @@ Register.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "password",
@@ -409,7 +503,10 @@ Register.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "to",
@@ -420,13 +517,17 @@ Register.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       })
     ],
     "inv_fields": []
   });
 
 SignIn.meta = new Red.Model.EventMeta({
+    "__repr__": new Meteor.Collection('SignIn'),
     "name": "RedLib::Web::Auth::SignIn",
     "relative_name": "SignIn",
     "sigCls": SignIn,
@@ -446,7 +547,10 @@ SignIn.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "email",
@@ -457,7 +561,10 @@ SignIn.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "password",
@@ -468,7 +575,10 @@ SignIn.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "to",
@@ -479,13 +589,17 @@ SignIn.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       })
     ],
     "inv_fields": []
   });
 
 SignOut.meta = new Red.Model.EventMeta({
+    "__repr__": new Meteor.Collection('SignOut'),
     "name": "RedLib::Web::Auth::SignOut",
     "relative_name": "SignOut",
     "sigCls": SignOut,
@@ -505,7 +619,10 @@ SignOut.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "server",
@@ -516,13 +633,17 @@ SignOut.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       })
     ],
     "inv_fields": []
   });
 
 Unregister.meta = new Red.Model.EventMeta({
+    "__repr__": new Meteor.Collection('Unregister'),
     "name": "RedLib::Web::Auth::Unregister",
     "relative_name": "Unregister",
     "sigCls": Unregister,
@@ -542,7 +663,10 @@ Unregister.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "to",
@@ -553,13 +677,17 @@ Unregister.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       })
     ],
     "inv_fields": []
   });
 
 CreateRecord.meta = new Red.Model.EventMeta({
+    "__repr__": new Meteor.Collection('CreateRecord'),
     "name": "RedLib::Crud::CreateRecord",
     "relative_name": "CreateRecord",
     "sigCls": CreateRecord,
@@ -579,7 +707,10 @@ CreateRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "saveRecord",
@@ -590,7 +721,10 @@ CreateRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "from",
@@ -601,7 +735,10 @@ CreateRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "to",
@@ -612,13 +749,17 @@ CreateRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       })
     ],
     "inv_fields": []
   });
 
 CreateRecordAndLink.meta = new Red.Model.EventMeta({
+    "__repr__": new Meteor.Collection('CreateRecordAndLink'),
     "name": "RedLib::Crud::CreateRecordAndLink",
     "relative_name": "CreateRecordAndLink",
     "sigCls": CreateRecordAndLink,
@@ -638,7 +779,10 @@ CreateRecordAndLink.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "fieldName",
@@ -649,7 +793,10 @@ CreateRecordAndLink.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "from",
@@ -660,7 +807,10 @@ CreateRecordAndLink.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "to",
@@ -671,13 +821,17 @@ CreateRecordAndLink.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       })
     ],
     "inv_fields": []
   });
 
 LinkToRecord.meta = new Red.Model.EventMeta({
+    "__repr__": new Meteor.Collection('LinkToRecord'),
     "name": "RedLib::Crud::LinkToRecord",
     "relative_name": "LinkToRecord",
     "sigCls": LinkToRecord,
@@ -697,7 +851,10 @@ LinkToRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "fieldName",
@@ -708,7 +865,10 @@ LinkToRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "fieldValue",
@@ -719,7 +879,10 @@ LinkToRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "set",
+        "scalar": false,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "saveTarget",
@@ -730,7 +893,10 @@ LinkToRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "from",
@@ -741,7 +907,10 @@ LinkToRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "to",
@@ -752,13 +921,17 @@ LinkToRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       })
     ],
     "inv_fields": []
   });
 
 UpdateRecord.meta = new Red.Model.EventMeta({
+    "__repr__": new Meteor.Collection('UpdateRecord'),
     "name": "RedLib::Crud::UpdateRecord",
     "relative_name": "UpdateRecord",
     "sigCls": UpdateRecord,
@@ -778,7 +951,10 @@ UpdateRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "params",
@@ -789,7 +965,10 @@ UpdateRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "saveTarget",
@@ -800,7 +979,10 @@ UpdateRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       }),
       new Red.Model.Field({
         "name": "from",
@@ -811,7 +993,10 @@ UpdateRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "to",
@@ -822,13 +1007,17 @@ UpdateRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       })
     ],
     "inv_fields": []
   });
 
 DeleteRecord.meta = new Red.Model.EventMeta({
+    "__repr__": new Meteor.Collection('DeleteRecord'),
     "name": "RedLib::Crud::DeleteRecord",
     "relative_name": "DeleteRecord",
     "sigCls": DeleteRecord,
@@ -848,7 +1037,10 @@ DeleteRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "from",
@@ -859,7 +1051,10 @@ DeleteRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "to",
@@ -870,13 +1065,17 @@ DeleteRecord.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       })
     ],
     "inv_fields": []
   });
 
 DeleteRecords.meta = new Red.Model.EventMeta({
+    "__repr__": new Meteor.Collection('DeleteRecords'),
     "name": "RedLib::Crud::DeleteRecords",
     "relative_name": "DeleteRecords",
     "sigCls": DeleteRecords,
@@ -896,7 +1095,10 @@ DeleteRecords.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "set",
+        "scalar": false,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "from",
@@ -907,7 +1109,10 @@ DeleteRecords.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "to",
@@ -918,13 +1123,17 @@ DeleteRecords.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       })
     ],
     "inv_fields": []
   });
 
 CreateRoom.meta = new Red.Model.EventMeta({
+    "__repr__": new Meteor.Collection('CreateRoom'),
     "name": "CreateRoom",
     "relative_name": "CreateRoom",
     "sigCls": CreateRoom,
@@ -944,7 +1153,10 @@ CreateRoom.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "serv",
@@ -955,7 +1167,10 @@ CreateRoom.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "roomName",
@@ -966,13 +1181,17 @@ CreateRoom.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       })
     ],
     "inv_fields": []
   });
 
 JoinRoom.meta = new Red.Model.EventMeta({
+    "__repr__": new Meteor.Collection('JoinRoom'),
     "name": "JoinRoom",
     "relative_name": "JoinRoom",
     "sigCls": JoinRoom,
@@ -992,7 +1211,10 @@ JoinRoom.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "serv",
@@ -1003,7 +1225,10 @@ JoinRoom.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "room",
@@ -1014,13 +1239,17 @@ JoinRoom.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       })
     ],
     "inv_fields": []
   });
 
 SendMsg.meta = new Red.Model.EventMeta({
+    "__repr__": new Meteor.Collection('SendMsg'),
     "name": "SendMsg",
     "relative_name": "SendMsg",
     "sigCls": SendMsg,
@@ -1040,7 +1269,10 @@ SendMsg.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "serv",
@@ -1051,7 +1283,10 @@ SendMsg.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "room",
@@ -1062,7 +1297,10 @@ SendMsg.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": false
       }),
       new Red.Model.Field({
         "name": "msgText",
@@ -1073,74 +1311,26 @@ SendMsg.meta = new Red.Model.EventMeta({
         "belongsToParent": false,
         "transient": true,
         "ordering": false,
-        "inv": null
+        "inv": null,
+        "multiplicity": "lone",
+        "scalar": true,
+        "primitive": true
       })
     ],
-    "inv_fields": [],
-
-    "ensures": function() {
-      var sender = Meteor.user() ? Meteor.user().emails[0].address : "Anonymous";
-      var msg = Sunny.Msg.create({sender:sender, text:this.msgText, time:Date.now()});
-
-      // TODO: add msg to room
-      return msg;
-    }
+    "inv_fields": []
   });
 
-Sunny = {
-  /* ------------- record signatures ------------- */
 
-  AuthUser: AuthUser,
-  User: User,
-  Msg:  Msg,
-  ChatRoom: ChatRoom,
-  WebClient: WebClient,
-  WebServer: WebServer,
-  AuthClient: AuthClient,
-  AuthServer: AuthServer,
-  Client: Client,
-  Server: Server,
+/* ------------- event handlers ------------- */
 
-  /* ------------- event signatures ------------- */
-
-  ClientConnected: ClientConnected,
-  ClientDisconnected: ClientDisconnected,
-  Register: Register,
-  SignIn: SignIn,
-  SignOut: SignOut,
-  Unregister: Unregister,
-  CreateRecord: CreateRecord,
-  CreateRecordAndLink: CreateRecordAndLink,
-  LinkToRecord: LinkToRecord,
-  UpdateRecord: UpdateRecord,
-  DeleteRecord: DeleteRecord,
-  DeleteRecords: DeleteRecords,
-  CreateRoom: CreateRoom,
-  JoinRoom: JoinRoom,
-  SendMsg: SendMsg
+SendMsg.meta.ensures = function() {
+  var sender = Meteor.user() ? Meteor.user().emails[0].address : "Anonymous";
+  var msg = Msg.create({sender: sender, text: this.msgText, time: Date.now()});
+  if (this.room !== undefined) {
+    this.room.messages.push(msg);
+  }
+  // TODO: add msg to room
+  return msg;
 };
 
-for (var prop in Sunny) {
-  var cls = Sunny[prop];
-  if (cls.meta === undefined) continue;
-  for (var fldIdx = 0; fldIdx < cls.meta.fields.length; fldIdx++) {
-    var fld = cls.meta.fields[fldIdx];
-    var fldName = fld.name;
-    var getter = 'function f()    { return this.readField("' + fldName + '");}; f';
-    var setter = 'function f(val) { this.writeField("' + fldName + '", val);};  f';
-    // var gf = eval(str1);
-    // var sf = eval(str2);
-    // var str = 'Object.defineProperty(cls.prototype, fldName, {' +
-    //   'enumerable: true,' +
-    //   'get: function ()    { return this["sender"];},' +
-    //   'set: function (val) { this["sender"] = val;}' +
-    // '})';
-    // console.log(str);
-    // eval(str);
-    Object.defineProperty(cls.prototype, fldName , {
-      enumerable: true,
-      get: eval(getter),
-      set: eval(setter)
-    });
-  }
-}
+Red.initApp();

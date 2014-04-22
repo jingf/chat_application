@@ -16,8 +16,6 @@ $(function() {
     }
   };
 
-  Red.Autoview.processAutoview($("body"));
-
   /* ----------------------------------------------------------------
    * Handle the 'click' event for all elements that have
    * the 'data-trigger-event' attribute set.
