@@ -1329,7 +1329,6 @@ SendMsg.meta.ensures = function() {
   if (this.room !== undefined) {
     this.room.messages.push(msg);
   }
-  // TODO: add msg to room
   return msg;
 };
 
