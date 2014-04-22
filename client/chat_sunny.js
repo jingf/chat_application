@@ -1321,15 +1321,4 @@ SendMsg.meta = new Red.Model.EventMeta({
   });
 
 
-/* ------------- event handlers ------------- */
-
-SendMsg.meta.ensures = function() {
-  var sender = Meteor.user() ? Meteor.user().emails[0].address : "Anonymous";
-  var msg = Msg.create({sender: sender, text: this.msgText, time: Date.now()});
-  if (this.room !== undefined) {
-    this.room.messages.push(msg);
-  }
-  return msg;
-};
-
 Red.initApp();

@@ -1,4 +1,4 @@
-/** Templates **/
+/* ---------------- Templates --------------- */
 
 //syntax: Template.<template-name>.<template-variable>
 // Return all messages from db and sort based on time
