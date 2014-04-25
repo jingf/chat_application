@@ -57,7 +57,7 @@ Template.input.events = {
 				Messages.insert(msg);
 
 				// Find and update the room that the message belongs to
-				// change to theRoom.messages.push() 
+				// Want end result: change to theRoom.messages.push() 
 				var theRoom = Chatrooms.findOne( { name: "chatroomH"} );
 				Chatrooms.update( 
 					{ _id: theRoom._id }, 
