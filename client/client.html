@@ -3,15 +3,57 @@
 </head>
 
 <body>
-  {{> loginButtons align="right"}}<br>
-  <h1>Chat Application</h1>
-  {{> welcome}}
-  {{> room}}
-  {{> messages}}
+  <!-- If logged in, display the chatrooms -->
+  {{#if currentUser}}
+    {{> menu}}
+    {{> welcome}}
+    <p>Logged in as {{currentUser.name}}.  Currently {{currentUser.status}}</p>
+    {{> onlineUsers}}
+    {{> room}}
+    {{> messages}}
+  <!-- Otherwise, display login screen -->
+  {{else}}
+    <h1>Chat Application</h1>
+    {{> welcome}}
+    {{> login }}
+    {{> register }}
+  {{/if}}
 </body>
 
 <template name="welcome">
-  <p>Welcome to the example chat application!</p>
+  <h2>Welcome to the example chat application!</h2>
+</template>
+
+<template name="menu">
+  <nav class="navbar navbar-default" role="navigation">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/">Meteor Chat</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+        {{> logout}}
+      </ul>
+    </div>
+  </nav>
+</template>
+
+<template name="logout">
+  <form id="logout-form" action="action">
+    <!-- <input type=hidden name=dis value=yes> -->
+    <input type=submit value="Sign Out">
+  </form>
+</template>
+
+<template name="onlineUsers">
+    <ul>Online users</ul>
+  {{#each onlineUsersArray}}
+    <li>{{email}}</li>
+  {{/each}}
 </template>
 
 <template name="room">
@@ -32,4 +74,28 @@
     {{/each}}
     </div>
   {{/each}}
+</template>
+
+<template name="login">
+  <form id="login-form" action="action">
+      <div>
+        Name <input type="text" id="login-username" /><br />
+        Email <input type="email" id="login-email" /><br />
+        Password <input type="password" id="login-password" /> <br />
+        Status <input type="text" id="login-status-message"><br />
+        <input type="submit" id="login-button" value="Sign in" />
+      </div>
+   </form> 
+</template>
+
+<template name="register">
+  <form id="register-form" action="action">
+      <div>
+       Name <input type="text" id="account-username" /><br />
+       Email <input type="email" id="account-email" /><br />
+       Password <input type="password" id="account-password" /><br />
+       Status <input type="text" id="account-status-message"><br />
+       <input type="submit" id="create-account" value="Create an Account" />
+     </div>
+   </form>
 </template>

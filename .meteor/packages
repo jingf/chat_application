@@ -7,6 +7,5 @@ standard-app-packages
 autopublish
 insecure
 accounts-password
-accounts-ui
-accounts-facebook
-accounts-google
+accounts-base
+bootstrap-3

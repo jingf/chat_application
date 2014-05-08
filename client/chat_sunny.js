@@ -4,6 +4,8 @@ var AuthUser = Red.Constr.record("AuthUser", Red.Model.Record);
 var User = Red.Constr.record("User", AuthUser);
 var Msg = Red.Constr.record("Msg", Red.Model.Record);
 var ChatRoom = Red.Constr.record("ChatRoom", Red.Model.Record);
+// Collection to keep track of online users (?)
+var onlineUsers = Red.Constr.record("onlineUsers", Red.Model.Record);
 var WebClient = Red.Constr.record("WebClient", Red.Model.Record);
 var WebServer = Red.Constr.record("WebServer", Red.Model.Record);
 var AuthClient = Red.Constr.record("AuthClient", WebClient);
