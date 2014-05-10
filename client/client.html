@@ -4,10 +4,14 @@
 
 <body>
   <!-- If logged in, display the chatrooms -->
-  {{#if currentUser}}
+  {{> loggedIn}}
+</body>
+
+<template name="loggedIn">
+  {{#if loggedIn}}
     {{> menu}}
     {{> welcome}}
-    <p>Logged in as {{currentUser.name}}.  Currently {{currentUser.status}}</p>
+    <p>Logged in as {{loggedInUser.name}}.  Currently {{loggedInUser.status}}</p>
     {{> onlineUsers}}
     {{> room}}
     {{> messages}}
@@ -18,7 +22,7 @@
     {{> login }}
     {{> register }}
   {{/if}}
-</body>
+</template>
 
 <template name="welcome">
   <h2>Welcome to the example chat application!</h2>
@@ -50,14 +54,21 @@
 </template>
 
 <template name="onlineUsers">
-    <ul>Online users</ul>
   {{#each onlineUsersArray}}
-    <li>{{email}}</li>
-  {{/each}}
+    <div class="row-fluid">
+      <div class="span2">
+        <li>{{email}}</li>
+      </div>
+    </div>
+  {{/each}}  
 </template>
 
 <template name="room">
-  <p>Create new Chatroom: <input type="text" id="room_name"></p>
+  <div class="row-fluid">
+    <div class="span4">
+      <p>Create new Chatroom: <input type="text" id="room_name"></p>
+    </div>
+  </div>
 </template>
 
 <template name="input">
@@ -79,10 +90,8 @@
 <template name="login">
   <form id="login-form" action="action">
       <div>
-        Name <input type="text" id="login-username" /><br />
         Email <input type="email" id="login-email" /><br />
         Password <input type="password" id="login-password" /> <br />
-        Status <input type="text" id="login-status-message"><br />
         <input type="submit" id="login-button" value="Sign in" />
       </div>
    </form> 
@@ -94,7 +103,6 @@
        Name <input type="text" id="account-username" /><br />
        Email <input type="email" id="account-email" /><br />
        Password <input type="password" id="account-password" /><br />
-       Status <input type="text" id="account-status-message"><br />
        <input type="submit" id="create-account" value="Create an Account" />
      </div>
    </form>

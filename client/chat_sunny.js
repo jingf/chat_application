@@ -152,7 +152,7 @@ User.meta = new Red.Model.RecordMeta({
     "placeholder": false,
     "extra": {},
     "subsigs": [],
-    "parentSig": null,
+    "parentSig": AuthUser,
     "fields": [new Red.Model.Field({
       "name": "status",
       "type": "String",

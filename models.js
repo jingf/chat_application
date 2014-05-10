@@ -5,6 +5,7 @@
 
 onlineUsers = new Meteor.Collection("onlineUsers");
 
+
 if (Meteor.isServer) {
 
   // chat_sunny is going to create these on the client
@@ -17,11 +18,14 @@ if (Meteor.isServer) {
 
   /* ------------- Sunny events ------------- */
   //TODO: this should also exist on the server, but it's fine for now
-
+  Sunny.SendMsg.meta.requires = function() {
+    if (!Meteor.user())
+      return "must log in first!";
+    return null; 
+  };
   Sunny.SendMsg.meta.ensures = function() {
-    var sender = Meteor.user() ? Meteor.user().emails[0].address : "Anonymous";
     var msg = Sunny.Msg.create({
-      sender: sender,
+      sender: Meteor.user().emails[0].address,
       text: this.msgText,
       time: Date.now()
     });

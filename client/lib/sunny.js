@@ -180,6 +180,16 @@ Red = (function() {
           }
         }
       });
+      Object.defineProperty(c, "find", {
+        value: function(selector, opts) {
+          if (this.meta !== undefined) {
+            var mList = this.meta.__repr__.find(selector, opts).fetch();
+            return me.toSunnyList2(this, mList);
+          } else {
+            return [];
+          }
+        }
+      });
       Object.defineProperty(c, "create", {
         value: function(objProps) {
           var props = objProps || {};
@@ -572,6 +582,7 @@ Red = (function() {
           if (this.fields[i].name == name)
             return this.fields[i];
         }
+        if (this.superRecord()) return this.superRecord().meta.field(name);
         return undefined;
       }
     };
@@ -654,6 +665,13 @@ Red = (function() {
       },
 
       trigger: function() {
+        if (this.meta().requires) {
+          var err = this.meta().requires.apply(this);
+          if (err) {
+            alert(err);
+            return false;
+          }
+        }
         return this.meta().ensures.apply(this);
       },
 
