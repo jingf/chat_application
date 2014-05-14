@@ -3,12 +3,12 @@
 </head>
 
 <body>
-  {{> loggedIn}}
+  {{> loggedInTemplate}}
 </body>
 
-<template name="loggedIn">
+<template name="loggedInTemplate">
   <!-- If logged in, display the chatrooms -->
-  {{#if loggedIn}}
+  {{#if userID}}
     {{> menu_loggedIn}}
     <div class="container">
       {{> welcome}}

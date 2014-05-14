@@ -1,8 +1,10 @@
 // var loggedInUser = null;
 // var loggedIn = false;
 // var email;
-var userID = null;
-
+//var userID = null;
+Template.loggedInTemplate.userID = function() {
+  return Session.get("userID");
+}
 
 /* ---------------- Templates --------------- */
 
@@ -29,11 +31,11 @@ Template.onlineUsers.onlineUsersArray = function() {
   return onlineUsersArray;
 }; 
 
-Template.loggedIn.loggedIn = function() {
+Template.loggedInTemplate.isLoggedIn = function() {
   console.log("template loggedInUser ", loggedInUser);
   //loggedIn = loggedInUser.find({email: email});
-  //loggedIn = onlineUsers.find({_id: userID}).fetch();
-  loggedIn = true;
+  loggedIn = onlineUsers.find({_id: userID}).fetch();
+  //loggedIn = true;
   console.log("template LoggedInUser, loggedIn ", loggedIn);
   console.log("userID: ", userID);
   return loggedIn;
@@ -90,13 +92,16 @@ Template.login.events({
         console.log("email", email);
 
         var userFound = Sunny.User.find( {email: email, password: password} );
-        console.log("User found by login is ", userFound);
+        console.log("User found by login is ", userFound[0].id);
         console.log("Type of userFound ", typeof(userFound));
 
         if (userFound) {
           // TODO: try inserting "user"
-          onlineUsers.insert({_id: userFound.id, email: email});
+          onlineUsers.insert({_id: userFound[0].id, email: email});
           console.log("Inserted into onlineUsers");
+
+          Session.set("userID", userFound[0].id);
+
           loggedInUser.insert(userFound);
           console.log("In logged in; loggedInUser collection is ", loggedInUser);
           // loggedInUser = Sunny.User.find({email: email, password: password});
@@ -128,7 +133,8 @@ Template.logout.events({
   'submit #logout-form' : function(e, t) {
     console.log("Before removing email from onlineUsers");
     
-    onlineUsers.remove(userID);
+    onlineUsers.remove(Session.get("userID"));
+    // onlineUsers.remove(userID);
     // loggedInUser = null;
     // loggedIn = false;
     // loggedInUser.drop();
@@ -160,8 +166,8 @@ Template.register.events({
             });
       
           console.log("user id ", user.id, "and ", typeof(user.id));
-          userID = user.id;
-          console.log("userID is set to ", userID)
+          Session.set("userID", user.id);
+          console.log("userID is set to ", Session.get("userID"));
 
 
           // loggedIn = true;
@@ -173,7 +179,7 @@ Template.register.events({
 
           //Add this user's information to onlineUsers collection
           // TODO: try add "user" instead of name and email
-          onlineUsers.insert({_id: userID, name: username, email: email, status: "free"}); 
+          onlineUsers.insert({_id: Session.get("userID"), name: username, email: email, status: "free"}); 
           
           loggedInUser.insert(user);
           console.log("In register; loggedInUser collection is ", loggedInUser);
