@@ -4,7 +4,7 @@
 // Chatrooms = new Meteor.Collection('chatrooms');
 
 onlineUsers = new Meteor.Collection("onlineUsers");
-
+loggedInUser = new Meteor.Collection("loggedInUser");
 
 if (Meteor.isServer) {
 

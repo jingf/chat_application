@@ -1,5 +1,7 @@
-var loggedInUser = null;
-var loggedIn = false;
+// var loggedInUser = null;
+// var loggedIn = false;
+// var email;
+var userID = null;
 
 
 /* ---------------- Templates --------------- */
@@ -28,7 +30,12 @@ Template.onlineUsers.onlineUsersArray = function() {
 }; 
 
 Template.loggedIn.loggedIn = function() {
-  console.log("template loggedIn ", loggedIn);
+  console.log("template loggedInUser ", loggedInUser);
+  //loggedIn = loggedInUser.find({email: email});
+  loggedIn = onlineUsers.find({_id: userID}).fetch();
+  //loggedIn = true;
+  console.log("template LoggedInUser, loggedIn ", loggedIn);
+  console.log("userID: ", userID);
   return loggedIn;
 };
 
@@ -82,16 +89,19 @@ Template.login.events({
         email = trimInput(email);
         console.log("email", email);
 
-        var userFound = Sunny.User.find( {email: email} );
+        var userFound = Sunny.User.find( {email: email, password: password} );
         console.log("User found by login is ", userFound);
+        console.log("Type of userFound ", typeof(userFound));
 
-        if (Sunny.User.find({email: email, password: password})) {
+        if (userFound) {
           // TODO: try inserting "user"
-          onlineUsers.insert({email: email});
-
-          loggedInUser = Sunny.User.find({email: email, password: password});
-          loggedIn = true;
-          console.log("loggedIn set to ", loggedIn);
+          onlineUsers.insert({_id: userFound.id, email: email});
+          console.log("Inserted into onlineUsers");
+          loggedInUser.insert(userFound);
+          console.log("In logged in; loggedInUser collection is ", loggedInUser);
+          // loggedInUser = Sunny.User.find({email: email, password: password});
+          // loggedIn = true;
+          // console.log("loggedIn set to ", loggedIn);
         }
 
         // // If validation passes, supply the appropriate fields to the
@@ -118,11 +128,11 @@ Template.logout.events({
   'submit #logout-form' : function(e, t) {
     console.log("Before removing email from onlineUsers");
     
-    onlineUsers.remove({email: this.email});
-    loggedInUser = null;
-    loggedIn = false;
-    
-    console.log("After removing email from onlineUsers");
+    onlineUsers.remove(userID);
+    // loggedInUser = null;
+    // loggedIn = false;
+    // loggedInUser.drop();
+    console.log("After removing all from loggedInUser");
   }
 });
 
@@ -143,26 +153,30 @@ Template.register.events({
 
         // If validation passes, create a user (Sunny object)
         if ( isValidPassword( password )) {
-          var temp = {
+          var user = Sunny.User.create({
                 name: username, 
                 email: email,
                 password: password
-            };
-          var user = Sunny.User.create(temp);
-          console.log("user id ", user.id);
+            });
+      
+          console.log("user id ", user.id, "and ", typeof(user.id));
+          userID = user.id;
+          console.log("userID is set to ", userID)
 
-          loggedIn = true;
-          console.log("loggedIn ", loggedIn);
+
+          // loggedIn = true;
+          // console.log("loggedIn ", loggedIn);
 
           // Equivalent of currentUser
-          loggedInUser = user;
-          console.log("loggedInUser ", loggedInUser);
+          // loggedInUser = user;
+          // console.log("loggedInUser ", loggedInUser);
 
           //Add this user's information to onlineUsers collection
           // TODO: try add "user" instead of name and email
-          onlineUsers.insert({name: username, email: email}); 
+          onlineUsers.insert({_id: userID, name: username, email: email, status: "free"}); 
           
-          
+          loggedInUser.insert(user);
+          console.log("In register; loggedInUser collection is ", loggedInUser);
           // Accounts.createUser({email: email, password : password}, function(err){
           //   if (err) {
           //     // Inform the user that account creation failed

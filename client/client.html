@@ -3,47 +3,95 @@
 </head>
 
 <body>
-  <!-- If logged in, display the chatrooms -->
   {{> loggedIn}}
 </body>
 
 <template name="loggedIn">
+  <!-- If logged in, display the chatrooms -->
   {{#if loggedIn}}
-    {{> menu}}
-    {{> welcome}}
-    <p>Logged in as {{loggedInUser.name}}.  Currently {{loggedInUser.status}}</p>
-    {{> onlineUsers}}
-    {{> room}}
-    {{> messages}}
+    {{> menu_loggedIn}}
+    <div class="container">
+      {{> welcome}}
+      <p>Logged in as {{loggedInUser.name}}.  Currently {{loggedInUser.status}}</p>
+      {{> onlineUsers}}
+      {{> room}}
+      {{> messages}}
+    </div>
   <!-- Otherwise, display login screen -->
   {{else}}
-    <h1>Chat Application</h1>
-    {{> welcome}}
-    {{> login }}
-    {{> register }}
+    {{> menu_loggedOut}}
+    <div class="container">
+      {{> welcome}}
+      {{> login }}
+      {{> register }}
+    </div>
   {{/if}}
 </template>
 
 <template name="welcome">
-  <h2>Welcome to the example chat application!</h2>
+    <h2>Welcome to the chat application!</h2>
 </template>
 
-<template name="menu">
-  <nav class="navbar navbar-default" role="navigation">
+<template name="menu_loggedIn">
+  <!-- <nav class="navbar navbar-default" role="navigation">
     <div class="navbar-header">
       <a class="navbar-brand" href="/">Meteor Chat</a>
     </div>
 
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        
       </ul>
 
       <ul class="nav navbar-nav navbar-right">
         {{> logout}}
       </ul>
     </div>
-  </nav>
+  </nav> -->
+  <div class="navbar navbar-inverse navbar-fixed-top">
+       <div class="navbar-inner">
+         <div class="container">
+           <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+             <span class="icon-bar"></span>
+             <span class="icon-bar"></span>
+             <span class="icon-bar"></span>
+           </button>
+           <a class="brand" href="#">Meteor Chat</a>
+           <div class="nav-collapse collapse">
+             <ul class="nav">
+               <li class="active"><a href="#">Home</a></li>
+               <li><a href="#about">About</a></li>
+               <li><a href="#contact">Contact</a></li>
+             </ul>
+             <ul class="nav pull-right">
+                {{> logout}}
+             </ul>
+           </div><!--/.nav-collapse -->
+         </div>
+       </div>
+     </div>
+</template>
+
+<template name="menu_loggedOut">
+  <div class="navbar navbar-inverse navbar-fixed-top">
+       <div class="navbar-inner">
+         <div class="container">
+           <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+             <span class="icon-bar"></span>
+             <span class="icon-bar"></span>
+             <span class="icon-bar"></span>
+           </button>
+           <a class="brand" href="#">Meteor Chat</a>
+           <div class="nav-collapse collapse">
+             <ul class="nav">
+               <li class="active"><a href="#">Home</a></li>
+               <li><a href="#about">About</a></li>
+               <li><a href="#contact">Contact</a></li>
+             </ul>
+             
+           </div><!--/.nav-collapse -->
+         </div>
+       </div>
+     </div>
 </template>
 
 <template name="logout">
