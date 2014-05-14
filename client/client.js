@@ -1,6 +1,3 @@
-
-
-
 /* ---------------- Templates --------------- */
 
 //syntax: Template.<template-name>.<template-variable>
@@ -25,13 +22,6 @@ Template.onlineUsers.onlineUsersArray = function() {
   var onlineUsersArray = onlineUsers.find().fetch();
   return onlineUsersArray;
 }; 
-
-Template.loggedInTemplate.isLoggedIn = function() {
-  //loggedIn = loggedInUser.find({email: email});
-  loggedIn = onlineUsers.find({_id: userID}).fetch();
-  //loggedIn = true;
-  return loggedIn;
-};
 
 Template.loggedInTemplate.userID = function() {
   return Session.get("userID");
@@ -77,44 +67,22 @@ Template.input.events = {
 Template.login.events({
     'submit #login-form' : function(e, t){
         e.preventDefault();
-        
         // retrieve the input field values
         // TODO: switch to JQuery
         var email = t.find('#login-email').value;
         var password = t.find('#login-password').value;
-
         // Trim and validate fields.... 
         email = trimInput(email);
-
+        // Find the user in the Sunny.User database
         var userFound = Sunny.User.find( {email: email, password: password} );
 
         if (userFound) {
           // TODO: try inserting "user"
           onlineUsers.insert({_id: userFound[0].id, email: email});
-
+          // Set the session variable userID so that sys realizes 
+          // user is logged in 
           Session.set("userID", userFound[0].id);
-
-          // loggedInUser.insert(userFound);
-          // console.log("In logged in; loggedInUser collection is ", loggedInUser);
-          // loggedInUser = Sunny.User.find({email: email, password: password});
-          // loggedIn = true;
-          // console.log("loggedIn set to ", loggedIn);
         }
-
-        // // If validation passes, supply the appropriate fields to the
-        // // Meteor.loginWithPassword() function.
-        // Meteor.loginWithPassword(email, password, function(err){
-        //   if (err)
-        //     // The user might not have been found, or their passwword
-        //     // could be incorrect. Inform the user that 
-        //     // login attempt has failed.
-        //     console.log("error ", err); 
-        //   else
-        //     // The user has been logged in.
-        //     console.log("Logged in");
-        //     // Put user in a collection of online users
-        //     onlineUsers.insert({name: username, email: email});
-        // });
         
         // Prevent form submission from reloading the page 
         return false; 
@@ -124,17 +92,12 @@ Template.login.events({
 Template.logout.events({
   'submit #logout-form' : function(e, t) {
     onlineUsers.remove(Session.get("userID"));
-    // onlineUsers.remove(userID);
-    // loggedInUser = null;
-    // loggedIn = false;
-    // loggedInUser.drop();
   }
 });
 
 Template.register.events({
     'submit #register-form' : function(e, t) {
         e.preventDefault();
-        
         // retrieve the input field values
         // TODO: switch to JQuery
         var username = t.find('#account-username').value;
@@ -153,38 +116,13 @@ Template.register.events({
                 email: email,
                 password: password
             });
-      
+          // Set session variable userID so sys realizes 
+          // user is logged in
           Session.set("userID", user.id);
-          
-
-
-          // loggedIn = true;
-          // console.log("loggedIn ", loggedIn);
-
-          // Equivalent of currentUser
-          // loggedInUser = user;
-          // console.log("loggedInUser ", loggedInUser);
 
           //Add this user's information to onlineUsers collection
           // TODO: try add "user" instead of name and email
           onlineUsers.insert({_id: Session.get("userID"), name: username, email: email, status: "free"}); 
-          
-          loggedInUser.insert(user);
-          
-          // Accounts.createUser({email: email, password : password}, function(err){
-          //   if (err) {
-          //     // Inform the user that account creation failed
-          //     console.log("error ", err);
-          //   } else {
-          //     // Success. Account has been created and the user
-          //     // has logged in successfully. 
-          //     // Create User object (?)
-          //     console.log("created user");
-          //     //onlineUsers.push(email);
-          //     onlineUsers.insert({name: username, email: email}); 
-          //   }
-
-          // });
         }
 
       return false;
