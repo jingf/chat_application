@@ -32,8 +32,8 @@ Template.onlineUsers.onlineUsersArray = function() {
 Template.loggedIn.loggedIn = function() {
   console.log("template loggedInUser ", loggedInUser);
   //loggedIn = loggedInUser.find({email: email});
-  loggedIn = onlineUsers.find({_id: userID}).fetch();
-  //loggedIn = true;
+  //loggedIn = onlineUsers.find({_id: userID}).fetch();
+  loggedIn = true;
   console.log("template LoggedInUser, loggedIn ", loggedIn);
   console.log("userID: ", userID);
   return loggedIn;

@@ -14,8 +14,10 @@
       {{> welcome}}
       <p>Logged in as {{loggedInUser.name}}.  Currently {{loggedInUser.status}}</p>
       {{> onlineUsers}}
+      <div id="input_and_chatroom">
       {{> room}}
       {{> messages}}
+      </div>
     </div>
   <!-- Otherwise, display login screen -->
   {{else}}
@@ -102,21 +104,16 @@
 </template>
 
 <template name="onlineUsers">
-  {{#each onlineUsersArray}}
-    <div class="row-fluid">
-      <div class="span2">
-        <li>{{email}}</li>
-      </div>
-    </div>
-  {{/each}}  
+  <div class="onlineUsersList">
+    <h4>Online users:</h4>
+    {{#each onlineUsersArray}}
+      <p> {{email}}</p>
+    {{/each}} 
+  </div> 
 </template>
 
 <template name="room">
-  <div class="row-fluid">
-    <div class="span4">
-      <p>Create new Chatroom: <input type="text" id="room_name"></p>
-    </div>
-  </div>
+  <p>Create new Chatroom: <input type="text" id="room_name"></p>
 </template>
 
 <template name="input">
