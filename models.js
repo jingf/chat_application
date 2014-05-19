@@ -18,13 +18,14 @@ if (Meteor.isServer) {
   /* ------------- Sunny events ------------- */
   //TODO: this should also exist on the server, but it's fine for now
   Sunny.SendMsg.meta.requires = function() {
-    if (!Meteor.user())
+    if (!Sunny.User.find({_id: Session.get("userID")})) {
       return "must log in first!";
+    }
     return null; 
   };
   Sunny.SendMsg.meta.ensures = function() {
     var msg = Sunny.Msg.create({
-      sender: Meteor.user().emails[0].address,
+      sender: Sunny.User.find({_id: Session.get("userID")})[0].email,
       text: this.msgText,
       time: Date.now()
     });

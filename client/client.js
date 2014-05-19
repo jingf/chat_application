@@ -92,6 +92,7 @@ Template.login.events({
 Template.logout.events({
   'submit #logout-form' : function(e, t) {
     onlineUsers.remove(Session.get("userID"));
+    Session.set("userID", null);
   }
 });
 

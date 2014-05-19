@@ -12,7 +12,6 @@
     {{> menu_loggedIn}}
     <div class="container">
       {{> welcome}}
-      <p>Logged in as {{loggedInUser.name}}.  Currently {{loggedInUser.status}}</p>
       {{> onlineUsers}}
       <div id="input_and_chatroom">
       {{> room}}
@@ -26,6 +25,7 @@
       {{> welcome}}
       {{> login }}
       {{> register }}
+      {{> messages}}
     </div>
   {{/if}}
 </template>
