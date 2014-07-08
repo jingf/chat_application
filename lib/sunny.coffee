@@ -19,45 +19,68 @@ Sunny.Types = do ->
   class Klass
     constructor: (@name, @primitive) ->
 
-  class Record extends Klass
-  class Machine extends Record
-  class Event extends Klass
-
+  class RecordKlass extends Klass
+  class MachineKlass extends Klass
+  class EventKlass extends Klass
+        
   class Type
     constructor: (@mult, @klasses) ->
 
   __exports : ["Int", "Bool", "Text"]
 
-  Klass     : Klass
-  Record    : Record
-  Machine   : Machine
-  Event     : Event
+  Klass     : Klass 
   Type      : Type
   Int       : new Klass "Int", true
   Bool      : new Klass "Bool", true
   Text      : new Klass "Text", true
+  isKlass   : (fn) -> typeof(fn) == "function" and fn.__meta?
+
 
 # -----------------------------------------------
 
+Sunny.Model = do ->
+  Record: class Record
+  Machine: class Machine
+  Event: class Event
+ 
+
 Sunny.meta =
-  records: {}
-  machines: {}
+  records: {},
+  machines: {},
   events: {}
 
 Sunny.Dsl = do ->
-
+ 
   createKls = (kls, parent) ->
     console.log "creating '#{kls.name}' #{parent.name}"
     unless kls.__super__?
+      console.log "extending #{kls}"
+      oldProt = kls.prototype
       `__extends(kls, parent)`
+      kls.prototype[pn] = p for pn, p of oldProt
 
-    # for propName, prop of meta.prototype
-    #   console.log "#{propName} --- #{prop}"
+    meta =
+      __repr__: new Meteor.Collection("__#{kls.name}"),  #TODO remove '__'
+      name: kls.name,
+      relative_name: kls.name,
+      sigCls: kls,
+      parentSig: null,
+      subsigs: [],
+      fields: []
+      
+    for pn, p of kls.prototype
+      if pn == "constructor"
+      else if typeof p == "function" and not Sunny.Types.isKlass(p)
+      else 
+        meta.fields.push name: pn, type: p
+
+    kls.meta = meta # TODO: remove
+    kls.__meta = meta
     return kls
 
   __exports: ["record", "machine", "set"]
 
-  record:  (x) -> x = createKls(x, Sunny.Types.Record); Sunny.meta.records[x.name] = x
-  machine: (x) -> x = createKls(x, Sunny.Types.Machine); Sunny.meta.machines[x.name] = x
+  record:  (x) -> x = createKls(x, Sunny.Model.Record); Sunny.meta.records[x.name] = x
+  machine: (x) -> x = createKls(x, Sunny.Model.Machine); Sunny.meta.machines[x.name] = x
 
   set: (t) -> new Sunny.Types.Type("set", t)

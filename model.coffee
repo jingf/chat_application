@@ -6,8 +6,8 @@ simport Sunny.Types
 # =================================
 
 record class AuthUser
-  name: Text
-  email: Text
+  name: Text,
+  email: Text,
   password: Text
 
 machine class WebClient
@@ -25,12 +25,12 @@ record class User extends AuthUser
   status: Text
 
 record class Msg
-  text: Text
+  text: Text,
   sender: User
 
 record class ChatRoom
-  name: Text
-  members: set User
+  name: Text,
+  members: set User,
   messages: set Msg
 
 # -------------------------------
