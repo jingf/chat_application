@@ -1,16 +1,17 @@
 simport Sunny.Dsl
+simport Sunny.Types
 
 # =================================
 # move to std lib
 # =================================
 
 record class AuthUser
-  name: "String"
-  email: "String"
-  password: "String"
+  name: Text
+  email: Text
+  password: Text
 
 machine class WebClient
-  auth_token: "String"
+  auth_token: Text
 
 machine class WebServer
   online_clients: set WebClient
@@ -21,14 +22,14 @@ machine class WebServer
 
 
 record class User extends AuthUser
-  status: "String"
+  status: Text
 
 record class Msg
-  text: "String"
+  text: Text
   sender: User
 
 record class ChatRoom
-  name: "String"
+  name: Text
   members: set User
   messages: set Msg
 
