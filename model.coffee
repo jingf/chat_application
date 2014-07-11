@@ -5,15 +5,15 @@ simport Sunny.Types
 # move to std lib
 # =================================
 
-record class AuthUser
-  name: Text,
-  email: Text,
+record class AuthUser extends Record
+  name: Text
+  email: Text
   password: Text
 
-machine class WebClient
+machine class WebClient extends Machine
   auth_token: Text
 
-machine class WebServer
+machine class WebServer extends Machine
   online_clients: set WebClient
 
 # ================================
@@ -24,13 +24,13 @@ machine class WebServer
 record class User extends AuthUser
   status: Text
 
-record class Msg
-  text: Text,
+record class Msg extends Record
+  text: Text
   sender: User
 
-record class ChatRoom
-  name: Text,
-  members: set User,
+record class ChatRoom extends Record
+  name: Text
+  members: set User
   messages: set Msg
 
 # -------------------------------
@@ -38,5 +38,6 @@ record class ChatRoom
 machine class Client extends WebClient
   user: User
 
-machine class Server
+machine class Server extends WebServer
   rooms: set ChatRoom
+
