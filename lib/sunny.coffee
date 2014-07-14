@@ -157,7 +157,7 @@ Sunny.Model = do ->
                     create: (objProps) ->
                       ans = new this()
                       props = objProps || {}
-                      _id = this.__meta__.__repr__.insert(props)
+                      ans.__props__._id = this.__meta__.__repr__.insert(props)
                       ans.__props__[pn] = pv for pn, pv of objProps
                       return ans
 
